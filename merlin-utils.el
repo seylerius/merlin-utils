@@ -101,6 +101,7 @@ Breaks the match into three groupings: file, line, column.")
          (project-root (projectile-project-root)))
     (setq merlin-utils--results-function-closure
           (lambda (buffer &rest)
+            (message "Entered result processor")
             (with-current-buffer buffer
               ;; Possibly advance to the first search result
               (if (looking-at "^rg started at ")
@@ -118,6 +119,7 @@ Breaks the match into three groupings: file, line, column.")
                          (re-search-forward
                           (rx-to-string
                            '(seq "\n" "\n")))))
+              (message "Advanced to results if necessary")
               ;; Twisting a `while' into an `until'
               (while
                   (when-let*
@@ -126,6 +128,8 @@ Breaks the match into three groupings: file, line, column.")
                        (result-location (merlin-utils--pos-of-result result-line))
                        (inhibit-read-only t))
                     (let (usage-p)
+                      (message "Jumping to a result location")
+                      (message "Result location: %s" (match-string 0))
                       (merlin--goto-file-and-point result-location)
                       (condition-case nil
                           (setq usage-p (merlin-utils--pos-equal-p orig-location (merlin/locate)))
