@@ -90,6 +90,7 @@ Breaks the match into three groupings: file, line, column.")
 (defun merlin-utils--process-rg-results (buffer msg)
   "Call closure on usage results BUFFER and print MSG."
   (message "Ripgrep returned: %s" msg)
+  (message "Buffer passed: %s" buffer)
   (funcall merlin-utils--results-function-closure buffer))
 
 (defun merlin-utils-locate-usages ()
@@ -129,7 +130,6 @@ Breaks the match into three groupings: file, line, column.")
                        (inhibit-read-only t))
                     (let (usage-p)
                       (message "Jumping to a result location")
-                      (message "Result location: %s" (match-string 0))
                       (merlin--goto-file-and-point result-location)
                       (condition-case nil
                           (setq usage-p (merlin-utils--pos-equal-p orig-location (merlin/locate)))
