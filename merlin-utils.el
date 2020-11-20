@@ -100,7 +100,7 @@ Breaks the match into three groupings: file, line, column.")
          (orig-location (cdr (assq 'location identifier-location)))
          (project-root (projectile-project-root)))
     (setq merlin-utils--results-function-closure
-          (lambda (buffer &rest)
+          (lambda (buffer)
             (message "Entered result processor")
             (with-current-buffer buffer
               ;; Possibly advance to the first search result
