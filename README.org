@@ -1,0 +1,6 @@
+#+TITLE: Merlin Utilities
+#+AUTHOR: Sable Seylerius
+
+* Introduction
+
+~merlin-utils.el~ is a library of utility functions to extend merlin-mode's functionality.
