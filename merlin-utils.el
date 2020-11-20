@@ -89,8 +89,6 @@ Breaks the match into three groupings: file, line, column.")
 
 (defun merlin-utils--process-rg-results (buffer msg)
   "Call closure on usage results BUFFER and print MSG."
-  (message "Ripgrep returned: %s" msg)
-  (message "Buffer passed: %s" buffer)
   (funcall merlin-utils--results-function-closure buffer))
 
 (defun merlin-utils-locate-usages ()
@@ -102,7 +100,6 @@ Breaks the match into three groupings: file, line, column.")
          (project-root (projectile-project-root)))
     (setq merlin-utils--results-function-closure
           (lambda (buffer)
-            (message "Entered result processor")
             (with-current-buffer buffer
               ;; Possibly advance to the first search result
               (if (looking-at "^rg started at ")
@@ -120,7 +117,6 @@ Breaks the match into three groupings: file, line, column.")
                          (re-search-forward
                           (rx-to-string
                            '(seq "\n" "\n")))))
-              (message "Advanced to results if necessary")
               ;; Twisting a `while' into an `until'
               (while
                   (when-let*
@@ -129,7 +125,6 @@ Breaks the match into three groupings: file, line, column.")
                        (result-location (merlin-utils--pos-of-result result-line))
                        (inhibit-read-only t))
                     (let (usage-p)
-                      (message "Jumping to a result location")
                       (merlin--goto-file-and-point result-location)
                       (condition-case nil
                           (setq usage-p (merlin-utils--pos-equal-p orig-location (merlin/locate)))
@@ -143,7 +138,6 @@ Breaks the match into three groupings: file, line, column.")
               (remove-hook 'compilation-finish-functions 'merlin-utils--process-rg-results))
             (merlin--goto-file-and-point orig-location)))
     (add-hook 'compilation-finish-functions 'merlin-utils--process-rg-results)
-    (message "%s" compilation-finish-functions)
     (setq rg-buffer-name "usages")
     (let ((rg-group-result nil))
       (rg-run
