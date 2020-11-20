@@ -102,21 +102,22 @@ Breaks the match into three groupings: file, line, column.")
     (setq merlin-utils--results-function-closure
           (lambda (buffer &rest)
             (with-current-buffer buffer
-              ;; Advance to the first search result
-              (re-search-forward
-               (rx-to-string
-                '(seq bol "rg started at "
-                      (one-or-more alpha) " "
-                      (one-or-more alpha) " "
-                      (one-or-more digit) " "
-                      (= 2 digit) ":"
-                      (= 2 digit) ":"
-                      (= 2 digit)
-                      "\n" "\n"
-                      (one-or-more (any alphanumeric "/" "-" "_" ".")))))
-              (re-search-forward
-               (rx-to-string
-                '(seq "\n" "\n")))
+              ;; Possibly advance to the first search result
+              (if (looking-at "^rg started at ")
+                  (progn (re-search-forward
+                          (rx-to-string
+                           '(seq bol "rg started at "
+                                 (one-or-more alpha) " "
+                                 (one-or-more alpha) " "
+                                 (one-or-more digit) " "
+                                 (= 2 digit) ":"
+                                 (= 2 digit) ":"
+                                 (= 2 digit)
+                                 "\n" "\n"
+                                 (one-or-more (any alphanumeric "/" "-" "_" ".")))))
+                         (re-search-forward
+                          (rx-to-string
+                           '(seq "\n" "\n")))))
               ;; Twisting a `while' into an `until'
               (while
                   (when-let*
@@ -140,14 +141,15 @@ Breaks the match into three groupings: file, line, column.")
     (add-hook 'compilation-finish-functions 'merlin-utils--process-rg-results)
     (message "%s" compilation-finish-functions)
     (setq rg-buffer-name "usages")
-    (rg-run
-     (merlin-utils--rg-identifier-regexp identifier)
-     "*.ml"
-     project-root
-     ;; Skipping LITERAL and CONFIRM
-     nil nil
-     ;; Specify flags to get jumpable line numbers, rather than groupings
-     '("-n" "-H" "--no-heading"))))
+    (let ((rg-group-result nil))
+      (rg-run
+       (merlin-utils--rg-identifier-regexp identifier)
+       "*.ml"
+       project-root
+       ;; Skipping LITERAL and CONFIRM
+       nil nil
+       ;; Specify flags to get jumpable line numbers, rather than groupings
+       '("-n" "-H" "--no-heading")))))
 
 (provide 'merlin-utils)
 ;;; merlin-utils.el ends here
