@@ -107,7 +107,7 @@ Breaks the match into three groupings: file, line, column.")
                           (rx-to-string
                            '(seq bol "rg started at "
                                  (one-or-more alpha) " "
-                                 (one-or-more alpha) " "
+                                 (one-or-more alpha) (one-or-more " ")
                                  (one-or-more digit) " "
                                  (= 2 digit) ":"
                                  (= 2 digit) ":"
