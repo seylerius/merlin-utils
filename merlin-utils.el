@@ -33,6 +33,10 @@
    (equal (cdr (assq 'col (assq 'pos pos1)))
           (cdr (assq 'col (assq 'pos pos2))))))
 
+(defun merlin-utils--same-file-p (pos1 pos2)
+  "Test the equality of the filenames in two merlin locations, POS1 and POS2."
+  (equal (cdr (assq 'file pos1)) (cdr (assq 'file pos2))))
+
 (defun merlin-utils--bounds-point-p (bounds)
   "Test whether BOUNDS surrounds point."
   (let ((start (merlin--point-of-pos (cdr (assq 'start bounds))))
@@ -91,9 +95,9 @@ Breaks the match into three groupings: file, line, column.")
   "Call closure on usage results BUFFER and print MSG."
   (funcall merlin-utils--results-function-closure buffer))
 
-(defun merlin-utils-locate-usages ()
+(defun merlin-utils-locate-usages (skip-origin-p)
   "Return an interactive list of usages of the identifier at point."
-  (interactive)
+  (interactive "P")
   (let* ((identifier-location (merlin-utils--identifier-at-point t))
          (identifier (cdr (assq 'identifier identifier-location)))
          (orig-location (cdr (assq 'location identifier-location)))
@@ -125,11 +129,15 @@ Breaks the match into three groupings: file, line, column.")
                        (result-location (merlin-utils--pos-of-result result-line))
                        (inhibit-read-only t))
                     (let (usage-p)
-                      (merlin--goto-file-and-point result-location)
-                      (condition-case nil
-                          (setq usage-p (merlin-utils--pos-equal-p orig-location (merlin/locate)))
-                        (error nil))
-                      (merlin-pop-stack)
+                      (if (not (and skip-origin-p
+                                    (merlin-utils--same-file-p orig-location
+                                                               result-location)))
+                          (progn
+                            (merlin--goto-file-and-point result-location)
+                            (condition-case nil
+                                (setq usage-p (merlin-utils--pos-equal-p orig-location (merlin/locate)))
+                              (error nil))
+                            (merlin-pop-stack)))
                       (if usage-p
                           (forward-line 1)
                         (delete-region (line-beginning-position) (+ 1 (line-end-position)))))
